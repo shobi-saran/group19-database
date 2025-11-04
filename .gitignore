@@ -2,4 +2,22 @@ data/
 *.zip
 *.DS_Store
 __MACOSX/
+
 *.idea/
+
+# Old/unnecessary files
+Group19-database.zip
+*.zip
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+
+# Environment files
+.env
