@@ -76,6 +76,17 @@ The setup script will display row counts to verify everything loaded correctly.
 
 This will install the required dependencies into the node_modules folder
 
+8. Run the back end
+   cd group19-database/backend
+   python app.py
+
+9. Open up a second terminal and run the front end
+   cd group19-database/client
+   npm start
+
+A browser should automatically open up.
+
+
 ## Database Schema
 
 Our schema includes:
