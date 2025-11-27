@@ -71,6 +71,11 @@ Or access them here: 
 
 The setup script will display row counts to verify everything loaded correctly.
 
+7. cd client
+   npm install
+
+This will install the required dependencies into the node_modules folder
+
 ## Database Schema
 
 Our schema includes:
