@@ -84,7 +84,7 @@ This will install the required dependencies into the node_modules folder
    cd group19-database/client
    npm start
 
-A browser should automatically open up.
+A browser should automatically open up. Make sure both terminals are running simultaneously.
 
 
 ## Database Schema
