@@ -9,7 +9,6 @@ function App() {
   const [dbStatus, setDbStatus] = useState(null);
   const [globalError, setGlobalError] = useState("");
 
-  // Load genres + DB status on load
   useEffect(() => {
     const loadGenres = async () => {
       try {
@@ -41,49 +40,56 @@ function App() {
   return (
     <div
       style={{
+        minHeight: "100vh",
         padding: "1.5rem",
         fontFamily: "system-ui, sans-serif",
         maxWidth: 1100,
         margin: "0 auto",
+        backgroundColor: "#020617",
+        color: "#e5e7eb",
       }}
     >
       <header style={{ marginBottom: "1.5rem" }}>
-        <h1>Music Discovery Dashboard</h1>
-        <p>
+        <h1 style={{ margin: 0, fontSize: "1.8rem" }}>Music Discovery Dashboard</h1>
+        <p style={{ marginTop: "0.4rem", fontSize: "0.9rem", color: "#9ca3af" }}>
           Backend: <code>{BACKEND}/api/…</code>
         </p>
         {dbStatus && (
-          <p style={{ fontSize: "0.9rem" }}>
-            DB status: <strong>{dbStatus.status}</strong> —{" "}
-            {dbStatus.message} ({dbStatus.total_tracks} tracks)
+          <p style={{ fontSize: "0.85rem", color: "#9ca3af", marginTop: "0.3rem" }}>
+            DB status: <strong>{dbStatus.status}</strong> — {dbStatus.message}{" "}
+            {typeof dbStatus.total_tracks === "number" && (
+              <>({dbStatus.total_tracks} tracks)</>
+            )}
           </p>
         )}
         {globalError && (
-          <p style={{ color: "red", fontSize: "0.9rem" }}>{globalError}</p>
+          <p style={{ color: "#f97373", fontSize: "0.9rem", marginTop: "0.3rem" }}>
+            {globalError}
+          </p>
         )}
       </header>
 
-      {/* Simple tab bar */}
       <nav style={{ marginBottom: "1rem" }}>
         {[
           ["genre", "Playlists by Genre"],
           ["artist", "Artist-Based"],
           ["charts", "Chart Hits & Hidden Gems"],
-          ["mood", "Workout / Happy / Decade"],
-          ["mix", "Mix & Stats"],
+          ["mood", "Workout / Happy / Throwback"],
+          ["mix", "Mix Playlist"],
           ["discover", "Search & Similar Artists"],
-          ["user", "Users & Saved Playlists"],
         ].map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
             style={{
               marginRight: "0.5rem",
-              padding: "0.4rem 0.8rem",
-              borderRadius: 4,
-              border: activeTab === key ? "2px solid black" : "1px solid #ccc",
-              background: activeTab === key ? "#eee" : "white",
+              padding: "0.45rem 0.9rem",
+              borderRadius: 999,
+              border: activeTab === key ? "1px solid #4f46e5" : "1px solid #1f2937",
+              background: activeTab === key ? "#111827" : "#020617",
+              color: "#e5e7eb",
               cursor: "pointer",
+              fontSize: "0.9rem",
             }}
           >
             {label}
@@ -91,14 +97,12 @@ function App() {
         ))}
       </nav>
 
-      {/* Tabs */}
       {activeTab === "genre" && <GenrePlaylistPanel genres={genres} />}
       {activeTab === "artist" && <ArtistPanels />}
       {activeTab === "charts" && <ChartsPanels genres={genres} />}
       {activeTab === "mood" && <MoodPanels />}
-      {activeTab === "mix" && <MixAndStatsPanel genres={genres} />}
+      {activeTab === "mix" && <MixPanel genres={genres} />}
       {activeTab === "discover" && <DiscoveryPanel />}
-      {activeTab === "user" && <UserPanel />}
     </div>
   );
 }
@@ -109,7 +113,6 @@ function PlaylistTable({ rows, extraCols = [] }) {
   if (!rows.length) return null;
   const sample = rows[0];
 
-  // basic columns that many routes share
   const hasGenre = "genre_name" in sample;
   const hasTempo = "tempo" in sample;
   const hasEnergy = "energy" in sample;
@@ -127,15 +130,72 @@ function PlaylistTable({ rows, extraCols = [] }) {
     >
       <thead>
         <tr>
-          <th style={{ textAlign: "left" }}>Track</th>
-          <th style={{ textAlign: "left" }}>Artist</th>
-          {hasGenre && <th style={{ textAlign: "left" }}>Genre</th>}
-          {hasTempo && <th style={{ textAlign: "right" }}>Tempo</th>}
-          {hasEnergy && <th style={{ textAlign: "right" }}>Energy</th>}
-          {hasDance && <th style={{ textAlign: "right" }}>Danceability</th>}
-          {hasPopularity && <th style={{ textAlign: "right" }}>Popularity</th>}
+          <th style={{ textAlign: "left", padding: "0.3rem 0.4rem", borderBottom: "1px solid #1f2937" }}>Track</th>
+          <th style={{ textAlign: "left", padding: "0.3rem 0.4rem", borderBottom: "1px solid #1f2937" }}>Artist</th>
+          {hasGenre && (
+            <th
+              style={{
+                textAlign: "left",
+                padding: "0.3rem 0.4rem",
+                borderBottom: "1px solid #1f2937",
+              }}
+            >
+              Genre
+            </th>
+          )}
+          {hasTempo && (
+            <th
+              style={{
+                textAlign: "right",
+                padding: "0.3rem 0.4rem",
+                borderBottom: "1px solid #1f2937",
+              }}
+            >
+              Tempo
+            </th>
+          )}
+          {hasEnergy && (
+            <th
+              style={{
+                textAlign: "right",
+                padding: "0.3rem 0.4rem",
+                borderBottom: "1px solid #1f2937",
+              }}
+            >
+              Energy
+            </th>
+          )}
+          {hasDance && (
+            <th
+              style={{
+                textAlign: "right",
+                padding: "0.3rem 0.4rem",
+                borderBottom: "1px solid #1f2937",
+              }}
+            >
+              Danceability
+            </th>
+          )}
+          {hasPopularity && (
+            <th
+              style={{
+                textAlign: "right",
+                padding: "0.3rem 0.4rem",
+                borderBottom: "1px solid #1f2937",
+              }}
+            >
+              Popularity
+            </th>
+          )}
           {extraCols.map((c) => (
-            <th key={c.key} style={{ textAlign: c.align || "left" }}>
+            <th
+              key={c.key}
+              style={{
+                textAlign: c.align || "left",
+                padding: "0.3rem 0.4rem",
+                borderBottom: "1px solid #1f2937",
+              }}
+            >
               {c.label}
             </th>
           ))}
@@ -144,16 +204,23 @@ function PlaylistTable({ rows, extraCols = [] }) {
       <tbody>
         {rows.map((r, idx) => (
           <tr key={idx}>
-            <td style={{ padding: "0.2rem 0.4rem" }}>{r.track_name}</td>
-            <td style={{ padding: "0.2rem 0.4rem" }}>{r.artist_name}</td>
+            <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+              {r.track_name}
+            </td>
+            <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+              {r.artist_name}
+            </td>
             {hasGenre && (
-              <td style={{ padding: "0.2rem 0.4rem" }}>{r.genre_name}</td>
+              <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+                {r.genre_name}
+              </td>
             )}
             {hasTempo && (
               <td
                 style={{
-                  padding: "0.2rem 0.4rem",
+                  padding: "0.25rem 0.4rem",
                   textAlign: "right",
+                  borderBottom: "1px solid #0f172a",
                 }}
               >
                 {r.tempo}
@@ -162,8 +229,9 @@ function PlaylistTable({ rows, extraCols = [] }) {
             {hasEnergy && (
               <td
                 style={{
-                  padding: "0.2rem 0.4rem",
+                  padding: "0.25rem 0.4rem",
                   textAlign: "right",
+                  borderBottom: "1px solid #0f172a",
                 }}
               >
                 {Number(r.energy).toFixed(2)}
@@ -172,8 +240,9 @@ function PlaylistTable({ rows, extraCols = [] }) {
             {hasDance && (
               <td
                 style={{
-                  padding: "0.2rem 0.4rem",
+                  padding: "0.25rem 0.4rem",
                   textAlign: "right",
+                  borderBottom: "1px solid #0f172a",
                 }}
               >
                 {Number(r.danceability).toFixed(2)}
@@ -182,8 +251,9 @@ function PlaylistTable({ rows, extraCols = [] }) {
             {hasPopularity && (
               <td
                 style={{
-                  padding: "0.2rem 0.4rem",
+                  padding: "0.25rem 0.4rem",
                   textAlign: "right",
+                  borderBottom: "1px solid #0f172a",
                 }}
               >
                 {r.popularity}
@@ -193,8 +263,9 @@ function PlaylistTable({ rows, extraCols = [] }) {
               <td
                 key={c.key}
                 style={{
-                  padding: "0.2rem 0.4rem",
+                  padding: "0.25rem 0.4rem",
                   textAlign: c.align || "left",
+                  borderBottom: "1px solid #0f172a",
                 }}
               >
                 {r[c.key]}
@@ -240,9 +311,39 @@ function GenrePlaylistPanel({ genres }) {
     }
   };
 
+  const handleMinChange = (e) => {
+    const value = Number(e.target.value);
+    if (value <= tempoMax) {
+      setTempoMin(value);
+    } else {
+      setTempoMin(tempoMax);
+    }
+  };
+
+  const handleMaxChange = (e) => {
+    const value = Number(e.target.value);
+    if (value >= tempoMin) {
+      setTempoMax(value);
+    } else {
+      setTempoMax(tempoMin);
+    }
+  };
+
   return (
-    <section>
-      <h2>Playlist by Genre & Tempo (Route 2)</h2>
+    <section
+      style={{
+        backgroundColor: "#020617",
+        borderRadius: 16,
+        padding: "1.1rem 1.1rem 1.3rem",
+        border: "1px solid #111827",
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
+        Playlist by Genre & Tempo
+      </h2>
+      <p style={{ marginTop: 0, marginBottom: "0.8rem", fontSize: "0.85rem", color: "#9ca3af" }}>
+        Choose a genre and adjust the tempo range to generate a focused playlist.
+      </p>
       <div
         style={{
           display: "flex",
@@ -254,6 +355,14 @@ function GenrePlaylistPanel({ genres }) {
         <select
           value={selectedGenre}
           onChange={(e) => setSelectedGenre(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 12,
+            padding: "0.45rem 0.9rem",
+            border: "1px solid #1f2937",
+            minWidth: 220,
+          }}
         >
           <option value="">Select a genre</option>
           {genres.map((g) => (
@@ -262,24 +371,58 @@ function GenrePlaylistPanel({ genres }) {
             </option>
           ))}
         </select>
-        <label>
-          Tempo {tempoMin}–{tempoMax}
-        </label>
-        <input
-          type="number"
-          value={tempoMin}
-          onChange={(e) => setTempoMin(Number(e.target.value))}
-          style={{ width: 70 }}
-        />
-        <input
-          type="number"
-          value={tempoMax}
-          onChange={(e) => setTempoMax(Number(e.target.value))}
-          style={{ width: 70 }}
-        />
-        <button onClick={fetchPlaylist}>Generate</button>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <span style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
+            Tempo {tempoMin}–{tempoMax}
+          </span>
+          <div
+            style={{
+              position: "relative",
+              width: 260,
+              height: 24,
+              marginTop: "0.25rem",
+            }}
+          >
+            <input
+              type="range"
+              min={60}
+              max={220}
+              value={tempoMin}
+              onChange={handleMinChange}
+              className="tempo-range tempo-range-min"
+            />
+            <input
+              type="range"
+              min={60}
+              max={220}
+              value={tempoMax}
+              onChange={handleMaxChange}
+              className="tempo-range tempo-range-max"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={fetchPlaylist}
+          style={{
+            padding: "0.5rem 1.1rem",
+            borderRadius: 12,
+            border: "1px solid #4f46e5",
+            backgroundColor: "#4f46e5",
+            color: "#f9fafb",
+            cursor: "pointer",
+            fontWeight: 500,
+          }}
+        >
+          Generate
+        </button>
       </div>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <p style={{ color: "#f97373", marginTop: "0.6rem", fontSize: "0.9rem" }}>
+          {error}
+        </p>
+      )}
       <PlaylistTable rows={playlist} />
     </section>
   );
@@ -316,15 +459,36 @@ function ArtistPanels() {
   };
 
   return (
-    <section>
-      <h2>Similar Songs from Favorite Artist (Route 1)</h2>
-      <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+    <section
+      style={{
+        backgroundColor: "#020617",
+        borderRadius: 16,
+        padding: "1.1rem 1.1rem 1.3rem",
+        border: "1px solid #111827",
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
+        Songs That Match This Artist&apos;s Sound
+      </h2>
+      <p style={{ marginTop: 0, marginBottom: "0.8rem", fontSize: "0.85rem", color: "#9ca3af" }}>
+        Uses the artist&apos;s audio profile to find similar tracks by other artists, not the
+        artist&apos;s own songs.
+      </p>
+      <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
         <input
           placeholder="Favorite artist (exact name)"
           value={artistName}
           onChange={(e) => setArtistName(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 10,
+            padding: "0.45rem 0.7rem",
+            border: "1px solid #1f2937",
+            minWidth: 260,
+          }}
         />
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Limit:{" "}
           <input
             type="number"
@@ -332,12 +496,36 @@ function ArtistPanels() {
             min={1}
             max={50}
             onChange={(e) => setLimit(Number(e.target.value))}
-            style={{ width: 60 }}
+            style={{
+              width: 60,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <button onClick={fetchArtistPlaylist}>Generate</button>
+        <button
+          onClick={fetchArtistPlaylist}
+          style={{
+            padding: "0.5rem 1.1rem",
+            borderRadius: 12,
+            border: "1px solid #4f46e5",
+            backgroundColor: "#4f46e5",
+            color: "#f9fafb",
+            cursor: "pointer",
+            fontWeight: 500,
+          }}
+        >
+          Generate
+        </button>
       </div>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <p style={{ color: "#f97373", marginTop: "0.6rem", fontSize: "0.9rem" }}>
+          {error}
+        </p>
+      )}
       <PlaylistTable rows={playlist} />
     </section>
   );
@@ -398,10 +586,33 @@ function ChartsPanels({ genres }) {
   };
 
   return (
-    <section>
-      <h2>Chart Hits & Hidden Gems (Routes 3 & 4)</h2>
+    <section
+      style={{
+        backgroundColor: "#020617",
+        borderRadius: 16,
+        padding: "1.1rem 1.1rem 1.3rem",
+        border: "1px solid #111827",
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
+        Chart Hits & Hidden Gems
+      </h2>
+      <p style={{ marginTop: 0, marginBottom: "0.8rem", fontSize: "0.85rem", color: "#9ca3af" }}>
+        Compare well-known chart hits with highly popular tracks that never made the charts.
+      </p>
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-        <select value={genre} onChange={(e) => setGenre(e.target.value)}>
+        <select
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 12,
+            padding: "0.45rem 0.9rem",
+            border: "1px solid #1f2937",
+            minWidth: 220,
+          }}
+        >
           <option value="">Select genre</option>
           {genres.map((g) => (
             <option key={g.genre_id} value={g.genre_name}>
@@ -409,32 +620,78 @@ function ChartsPanels({ genres }) {
             </option>
           ))}
         </select>
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Max chart rank:{" "}
           <input
             type="number"
             value={maxRank}
             onChange={(e) => setMaxRank(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <button onClick={loadChartHits}>Load Chart Hits</button>
-        <label>
+        <button
+          onClick={loadChartHits}
+          style={{
+            padding: "0.45rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4f46e5",
+            backgroundColor: "#4f46e5",
+            color: "#f9fafb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Load Chart Hits
+        </button>
+        <label style={{ fontSize: "0.9rem" }}>
           Hidden gems min popularity:{" "}
           <input
             type="number"
             value={minPopularity}
             onChange={(e) => setMinPopularity(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <button onClick={loadHiddenGems}>Load Hidden Gems</button>
+        <button
+          onClick={loadHiddenGems}
+          style={{
+            padding: "0.45rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4b5563",
+            backgroundColor: "#111827",
+            color: "#e5e7eb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Load Hidden Gems
+        </button>
       </div>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <p style={{ color: "#f97373", marginTop: "0.6rem", fontSize: "0.9rem" }}>
+          {error}
+        </p>
+      )}
 
       {chartHits.length > 0 && (
         <>
-          <h3 style={{ marginTop: "1rem" }}>Chart Hits</h3>
+          <h3 style={{ marginTop: "1rem", marginBottom: "0.3rem", fontSize: "1rem" }}>
+            Chart Hits
+          </h3>
           <PlaylistTable
             rows={chartHits}
             extraCols={[
@@ -447,7 +704,9 @@ function ChartsPanels({ genres }) {
 
       {hiddenGems.length > 0 && (
         <>
-          <h3 style={{ marginTop: "1rem" }}>Hidden Gems</h3>
+          <h3 style={{ marginTop: "1rem", marginBottom: "0.3rem", fontSize: "1rem" }}>
+            Hidden Gems
+          </h3>
           <PlaylistTable rows={hiddenGems} />
         </>
       )}
@@ -458,16 +717,13 @@ function ChartsPanels({ genres }) {
 //Workout (Routes 5, 6, 7)
 
 function MoodPanels() {
-  // Workout
   const [workout, setWorkout] = useState([]);
   const [minEnergy, setMinEnergy] = useState(0.75);
   const [minDance, setMinDance] = useState(0.65);
 
-  // Happy
   const [happy, setHappy] = useState([]);
   const [minValence, setMinValence] = useState(0.7);
 
-  // Decade
   const [startYear, setStartYear] = useState(1990);
   const [endYear, setEndYear] = useState(1999);
   const [decade, setDecade] = useState([]);
@@ -511,75 +767,155 @@ function MoodPanels() {
   };
 
   return (
-    <section>
-      <h2>Workout / Happy / Decade (Routes 5, 6, 7)</h2>
+    <section
+      style={{
+        backgroundColor: "#020617",
+        borderRadius: 16,
+        padding: "1.1rem 1.1rem 1.3rem",
+        border: "1px solid #111827",
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
+        Workout / Happy / Throwback
+      </h2>
 
-      {/* Workout */}
       <div style={{ marginBottom: "1rem" }}>
-        <h3>Workout Playlist (Route 5)</h3>
-        <label>
+        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Workout Playlist</h3>
+        <label style={{ fontSize: "0.9rem" }}>
           Min energy:{" "}
           <input
             type="number"
             step="0.05"
             value={minEnergy}
             onChange={(e) => setMinEnergy(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Min danceability:{" "}
           <input
             type="number"
             step="0.05"
             value={minDance}
             onChange={(e) => setMinDance(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <button onClick={loadWorkout}>Generate workout playlist</button>
+        <button
+          onClick={loadWorkout}
+          style={{
+            padding: "0.4rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4f46e5",
+            backgroundColor: "#4f46e5",
+            color: "#f9fafb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Generate workout playlist
+        </button>
         <PlaylistTable rows={workout} />
       </div>
 
-      {/* Happy */}
       <div style={{ marginBottom: "1rem" }}>
-        <h3>Happy Mood Playlist (Route 6)</h3>
-        <label>
+        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Happy Mood Playlist</h3>
+        <label style={{ fontSize: "0.9rem" }}>
           Min valence:{" "}
           <input
             type="number"
             step="0.05"
             value={minValence}
             onChange={(e) => setMinValence(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <button onClick={loadHappy}>Generate happy playlist</button>
+        <button
+          onClick={loadHappy}
+          style={{
+            padding: "0.4rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4b5563",
+            backgroundColor: "#111827",
+            color: "#e5e7eb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Generate happy playlist
+        </button>
         <PlaylistTable rows={happy} />
       </div>
 
-      {/* Decade */}
       <div>
-        <h3>Decade Throwback (Route 7)</h3>
-        <label>
+        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Throwback Playlist</h3>
+        <label style={{ fontSize: "0.9rem" }}>
           Start year:{" "}
           <input
             type="number"
             value={startYear}
             onChange={(e) => setStartYear(Number(e.target.value))}
-            style={{ width: 80 }}
+            style={{
+              width: 80,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           End year:{" "}
           <input
             type="number"
             value={endYear}
             onChange={(e) => setEndYear(Number(e.target.value))}
-            style={{ width: 80 }}
+            style={{
+              width: 80,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <button onClick={loadDecade}>Generate throwback</button>
+        <button
+          onClick={loadDecade}
+          style={{
+            padding: "0.4rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4b5563",
+            backgroundColor: "#111827",
+            color: "#e5e7eb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Generate throwback playlist
+        </button>
         <PlaylistTable
           rows={decade}
           extraCols={[
@@ -592,20 +928,15 @@ function MoodPanels() {
   );
 }
 
-//Mix playlist + stats (Routes 8 & 10)
+//Mix playlist (Route 8)
 
-function MixAndStatsPanel({ genres }) {
-  // mix
+function MixPanel({ genres }) {
   const [genre, setGenre] = useState("");
   const [maxChartRank, setMaxChartRank] = useState(30);
   const [minPopularity, setMinPopularity] = useState(55);
   const [hitsLimit, setHitsLimit] = useState(15);
   const [gemsLimit, setGemsLimit] = useState(15);
   const [mixRows, setMixRows] = useState([]);
-
-  // stats
-  const [statsIds, setStatsIds] = useState("");
-  const [statsResult, setStatsResult] = useState(null);
 
   const loadMix = async () => {
     if (!genre) return;
@@ -621,23 +952,38 @@ function MixAndStatsPanel({ genres }) {
     setMixRows(data);
   };
 
-  const loadStats = async () => {
-    if (!statsIds.trim()) return;
-    const params = new URLSearchParams({
-      spotify_ids: statsIds.trim(),
-    });
-    const res = await fetch(`${BACKEND}/api/playlist/stats?${params}`);
-    const data = await res.json();
-    setStatsResult(data);
-  };
-
   return (
-    <section>
-      <h2>Mix Playlist & Stats (Routes 8 & 10)</h2>
+    <section
+      style={{
+        backgroundColor: "#020617",
+        borderRadius: 16,
+        padding: "1.1rem 1.1rem 1.3rem",
+        border: "1px solid #111827",
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
+        Mix Playlist
+      </h2>
+      <p style={{ marginTop: 0, marginBottom: "0.8rem", fontSize: "0.85rem", color: "#9ca3af" }}>
+        Blend chart hits with hidden gems in a single playlist.
+      </p>
 
-      <h3>Chart Hits + Hidden Gems Mix (Route 8)</h3>
+      <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>
+        Chart Hits + Hidden Gems Mix
+      </h3>
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-        <select value={genre} onChange={(e) => setGenre(e.target.value)}>
+        <select
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 12,
+            padding: "0.45rem 0.9rem",
+            border: "1px solid #1f2937",
+            minWidth: 220,
+          }}
+        >
           <option value="">Select genre</option>
           {genres.map((g) => (
             <option key={g.genre_id} value={g.genre_name}>
@@ -645,43 +991,84 @@ function MixAndStatsPanel({ genres }) {
             </option>
           ))}
         </select>
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Max chart rank:{" "}
           <input
             type="number"
             value={maxChartRank}
             onChange={(e) => setMaxChartRank(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Min popularity:{" "}
           <input
             type="number"
             value={minPopularity}
             onChange={(e) => setMinPopularity(Number(e.target.value))}
-            style={{ width: 70 }}
+            style={{
+              width: 70,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Hits:{" "}
           <input
             type="number"
             value={hitsLimit}
             onChange={(e) => setHitsLimit(Number(e.target.value))}
-            style={{ width: 60 }}
+            style={{
+              width: 60,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Gems:{" "}
           <input
             type="number"
             value={gemsLimit}
             onChange={(e) => setGemsLimit(Number(e.target.value))}
-            style={{ width: 60 }}
+            style={{
+              width: 60,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>
-        <button onClick={loadMix}>Generate mix</button>
+        <button
+          onClick={loadMix}
+          style={{
+            padding: "0.45rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4f46e5",
+            backgroundColor: "#4f46e5",
+            color: "#f9fafb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Generate mix
+        </button>
       </div>
       <PlaylistTable
         rows={mixRows}
@@ -690,27 +1077,6 @@ function MixAndStatsPanel({ genres }) {
           { key: "popularity", label: "Popularity", align: "right" },
         ]}
       />
-
-      <h3 style={{ marginTop: "1.5rem" }}>Playlist Stats (Route 10)</h3>
-      <p style={{ fontSize: "0.85rem" }}>
-        Enter a comma-separated list of Spotify IDs
-        (e.g. <code>3n3Ppam7vgaVa1iaRUc9Lp,0eGsygTp906u18L0Oimnem</code>).
-        You can grab IDs from the Mix or Track Search tables.
-      </p>
-      <textarea
-        rows={2}
-        style={{ width: "100%" }}
-        value={statsIds}
-        onChange={(e) => setStatsIds(e.target.value)}
-      />
-      <button onClick={loadStats} style={{ marginTop: "0.5rem" }}>
-        Get stats
-      </button>
-      {statsResult && (
-        <pre style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-{JSON.stringify(statsResult, null, 2)}
-        </pre>
-      )}
     </section>
   );
 }
@@ -718,11 +1084,9 @@ function MixAndStatsPanel({ genres }) {
 //Discovery: artists, tracks, similar artists (Routes 9, 12, 18)
 
 function DiscoveryPanel() {
-  // artist search
   const [artistQuery, setArtistQuery] = useState("");
   const [artists, setArtists] = useState([]);
 
-  // similar artists
   const [similarBase, setSimilarBase] = useState("");
   const [similarParams, setSimilarParams] = useState({
     tempo_range: 25,
@@ -732,7 +1096,6 @@ function DiscoveryPanel() {
   });
   const [similarResults, setSimilarResults] = useState([]);
 
-  // track search
   const [trackQuery, setTrackQuery] = useState("");
   const [tracks, setTracks] = useState([]);
 
@@ -765,38 +1128,85 @@ function DiscoveryPanel() {
   };
 
   return (
-    <section>
-      <h2>Discovery Tools (Routes 9, 12, 18)</h2>
+    <section
+      style={{
+        backgroundColor: "#020617",
+        borderRadius: 16,
+        padding: "1.1rem 1.1rem 1.3rem",
+        border: "1px solid #111827",
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
+        Discovery Tools
+      </h2>
 
-      {/* Artist search */}
       <div style={{ marginBottom: "1rem" }}>
-        <h3>Search Artists (Route 12)</h3>
+        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Search Artists</h3>
         <input
           placeholder="Artist name contains…"
           value={artistQuery}
           onChange={(e) => setArtistQuery(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 10,
+            padding: "0.45rem 0.7rem",
+            border: "1px solid #1f2937",
+            minWidth: 260,
+          }}
         />{" "}
-        <button onClick={searchArtists}>Search</button>
+        <button
+          onClick={searchArtists}
+          style={{
+            padding: "0.4rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4b5563",
+            backgroundColor: "#111827",
+            color: "#e5e7eb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Search
+        </button>
         {artists.length > 0 && (
-          <ul style={{ marginTop: "0.5rem", maxHeight: 150, overflowY: "auto" }}>
+          <ul
+            style={{
+              marginTop: "0.5rem",
+              maxHeight: 150,
+              overflowY: "auto",
+              paddingLeft: "1.1rem",
+              fontSize: "0.9rem",
+            }}
+          >
             {artists.map((a) => (
               <li key={a.artist_id}>
-                {a.artist_name} <small>(id {a.artist_id})</small>
+                {a.artist_name}{" "}
+                <span style={{ color: "#6b7280", fontSize: "0.8rem" }}>
+                  (id {a.artist_id})
+                </span>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Similar artists */}
       <div style={{ marginBottom: "1rem" }}>
-        <h3>Similar Artists (Route 9)</h3>
+        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Similar Artists</h3>
         <input
           placeholder="Base artist (exact name)"
           value={similarBase}
           onChange={(e) => setSimilarBase(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 10,
+            padding: "0.45rem 0.7rem",
+            border: "1px solid #1f2937",
+            minWidth: 260,
+          }}
         />{" "}
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Tempo range:{" "}
           <input
             type="number"
@@ -807,10 +1217,17 @@ function DiscoveryPanel() {
                 tempo_range: Number(e.target.value),
               }))
             }
-            style={{ width: 60 }}
+            style={{
+              width: 60,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <label>
+        <label style={{ fontSize: "0.9rem" }}>
           Feature range:{" "}
           <input
             type="number"
@@ -822,10 +1239,30 @@ function DiscoveryPanel() {
                 feature_range: Number(e.target.value),
               }))
             }
-            style={{ width: 60 }}
+            style={{
+              width: 60,
+              backgroundColor: "#020617",
+              color: "#e5e7eb",
+              borderRadius: 8,
+              padding: "0.2rem 0.4rem",
+              border: "1px solid #1f2937",
+            }}
           />
         </label>{" "}
-        <button onClick={loadSimilar}>Find similar</button>
+        <button
+          onClick={loadSimilar}
+          style={{
+            padding: "0.4rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4f46e5",
+            backgroundColor: "#4f46e5",
+            color: "#f9fafb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Find similar
+        </button>
 
         {similarResults.length > 0 && (
           <table
@@ -838,34 +1275,92 @@ function DiscoveryPanel() {
           >
             <thead>
               <tr>
-                <th style={{ textAlign: "left" }}>Artist</th>
-                <th style={{ textAlign: "right" }}>Tracks</th>
-                <th style={{ textAlign: "right" }}>Avg Popularity</th>
-                <th style={{ textAlign: "right" }}>Avg Tempo</th>
-                <th style={{ textAlign: "right" }}>Avg Energy</th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Artist
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Tracks
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Avg Popularity
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Avg Tempo
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Avg Energy
+                </th>
               </tr>
             </thead>
             <tbody>
               {similarResults.map((r, idx) => (
                 <tr key={idx}>
-                  <td style={{ padding: "0.2rem 0.4rem" }}>{r.artist_name}</td>
+                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+                    {r.artist_name}
+                  </td>
                   <td
-                    style={{ padding: "0.2rem 0.4rem", textAlign: "right" }}
+                    style={{
+                      padding: "0.25rem 0.4rem",
+                      textAlign: "right",
+                      borderBottom: "1px solid #0f172a",
+                    }}
                   >
                     {r.track_count}
                   </td>
                   <td
-                    style={{ padding: "0.2rem 0.4rem", textAlign: "right" }}
+                    style={{
+                      padding: "0.25rem 0.4rem",
+                      textAlign: "right",
+                      borderBottom: "1px solid #0f172a",
+                    }}
                   >
                     {Number(r.avg_popularity).toFixed(2)}
                   </td>
                   <td
-                    style={{ padding: "0.2rem 0.4rem", textAlign: "right" }}
+                    style={{
+                      padding: "0.25rem 0.4rem",
+                      textAlign: "right",
+                      borderBottom: "1px solid #0f172a",
+                    }}
                   >
                     {Number(r.avg_tempo).toFixed(2)}
                   </td>
                   <td
-                    style={{ padding: "0.2rem 0.4rem", textAlign: "right" }}
+                    style={{
+                      padding: "0.25rem 0.4rem",
+                      textAlign: "right",
+                      borderBottom: "1px solid #0f172a",
+                    }}
                   >
                     {Number(r.avg_energy).toFixed(2)}
                   </td>
@@ -876,15 +1371,35 @@ function DiscoveryPanel() {
         )}
       </div>
 
-      {/* Track search */}
       <div>
-        <h3>Search Tracks (Route 18)</h3>
+        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Search Tracks</h3>
         <input
           placeholder="Track name contains…"
           value={trackQuery}
           onChange={(e) => setTrackQuery(e.target.value)}
+          style={{
+            backgroundColor: "#020617",
+            color: "#e5e7eb",
+            borderRadius: 10,
+            padding: "0.45rem 0.7rem",
+            border: "1px solid #1f2937",
+            minWidth: 260,
+          }}
         />{" "}
-        <button onClick={searchTracks}>Search tracks</button>
+        <button
+          onClick={searchTracks}
+          style={{
+            padding: "0.4rem 0.9rem",
+            borderRadius: 10,
+            border: "1px solid #4b5563",
+            backgroundColor: "#111827",
+            color: "#e5e7eb",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Search tracks
+        </button>
         {tracks.length > 0 && (
           <table
             style={{
@@ -896,217 +1411,83 @@ function DiscoveryPanel() {
           >
             <thead>
               <tr>
-                <th style={{ textAlign: "left" }}>Track</th>
-                <th style={{ textAlign: "left" }}>Artist</th>
-                <th style={{ textAlign: "right" }}>Popularity</th>
-                <th style={{ textAlign: "left" }}>Album</th>
-                <th style={{ textAlign: "left" }}>Spotify ID</th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Track
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Artist
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Popularity
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Album
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "0.3rem 0.4rem",
+                    borderBottom: "1px solid #1f2937",
+                  }}
+                >
+                  Spotify ID
+                </th>
               </tr>
             </thead>
             <tbody>
               {tracks.map((t, idx) => (
                 <tr key={idx}>
-                  <td style={{ padding: "0.2rem 0.4rem" }}>{t.track_name}</td>
-                  <td style={{ padding: "0.2rem 0.4rem" }}>{t.artist_name}</td>
+                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+                    {t.track_name}
+                  </td>
+                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+                    {t.artist_name}
+                  </td>
                   <td
-                    style={{ padding: "0.2rem 0.4rem", textAlign: "right" }}
+                    style={{
+                      padding: "0.25rem 0.4rem",
+                      textAlign: "right",
+                      borderBottom: "1px solid #0f172a",
+                    }}
                   >
                     {t.popularity}
                   </td>
-                  <td style={{ padding: "0.2rem 0.4rem" }}>{t.album_name}</td>
-                  <td style={{ padding: "0.2rem 0.4rem" }}>{t.spotify_id}</td>
+                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+                    {t.album_name}
+                  </td>
+                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
+                    {t.spotify_id}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
-    </section>
-  );
-}
-
-//Users & saved playlists (Routes 13–17)
-
-function UserPanel() {
-  const [userId, setUserId] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [userInfo, setUserInfo] = useState(null);
-  const [playlists, setPlaylists] = useState([]);
-  const [saveName, setSaveName] = useState("");
-  const [saveSpotifyIds, setSaveSpotifyIds] = useState("");
-  const [playlistToDelete, setPlaylistToDelete] = useState("");
-  const [message, setMessage] = useState("");
-
-  const createOrUpdateUser = async () => {
-    setMessage("");
-    const body = {
-      username,
-      email,
-    };
-    if (userId) body.user_id = Number(userId);
-    const res = await fetch(`${BACKEND}/api/user`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    if (data.user_id) {
-      setUserId(String(data.user_id));
-      setMessage(data.message);
-    } else {
-      setMessage("Error creating/updating user");
-    }
-  };
-
-  const loadUser = async () => {
-    if (!userId) return;
-    const res = await fetch(`${BACKEND}/api/user/${userId}`);
-    const data = await res.json();
-    setUserInfo(data);
-  };
-
-  const loadUserPlaylists = async () => {
-    if (!userId) return;
-    const res = await fetch(`${BACKEND}/api/user/${userId}/playlists`);
-    const data = await res.json();
-    setPlaylists(data);
-  };
-
-  const savePlaylist = async () => {
-    if (!userId || !saveName || !saveSpotifyIds.trim()) return;
-    const idsList = saveSpotifyIds.split(",").map((s) => s.trim());
-    const body = {
-      user_id: Number(userId),
-      playlist_name: saveName,
-      spotify_ids: idsList,
-    };
-    const res = await fetch(`${BACKEND}/api/playlist/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    setMessage(data.message || "Saved playlist.");
-  };
-
-  const deletePlaylist = async () => {
-    if (!playlistToDelete) return;
-    const res = await fetch(
-      `${BACKEND}/api/playlist/${playlistToDelete}`,
-      { method: "DELETE" }
-    );
-    const data = await res.json();
-    setMessage(data.message || "Deleted playlist.");
-  };
-
-  return (
-    <section>
-      <h2>Users & Saved Playlists (Routes 13–17)</h2>
-
-      <h3>Create / Update User (Route 14)</h3>
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-        <label>
-          User ID (optional):{" "}
-          <input
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            style={{ width: 80 }}
-          />
-        </label>
-        <label>
-          Username:{" "}
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </label>
-        <label>
-          Email:{" "}
-          <input value={email} onChange={(e) => setEmail(e.target.value)} />
-        </label>
-        <button onClick={createOrUpdateUser}>Save user</button>
-      </div>
-
-      <h3 style={{ marginTop: "1rem" }}>Load User & Playlists (Routes 13 & 16)</h3>
-      <button onClick={loadUser}>Load user info</button>{" "}
-      <button onClick={loadUserPlaylists}>Load user playlists</button>
-      {userInfo && (
-        <pre style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-{JSON.stringify(userInfo, null, 2)}
-        </pre>
-      )}
-      {playlists.length > 0 && (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "0.5rem",
-            fontSize: "0.9rem",
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={{ textAlign: "left" }}>Playlist ID</th>
-              <th style={{ textAlign: "left" }}>Name</th>
-              <th style={{ textAlign: "left" }}>Created</th>
-              <th style={{ textAlign: "right" }}>Tracks</th>
-            </tr>
-          </thead>
-          <tbody>
-            {playlists.map((p) => (
-              <tr key={p.playlist_id}>
-                <td style={{ padding: "0.2rem 0.4rem" }}>{p.playlist_id}</td>
-                <td style={{ padding: "0.2rem 0.4rem" }}>{p.name}</td>
-                <td style={{ padding: "0.2rem 0.4rem" }}>{p.created_at}</td>
-                <td
-                  style={{ padding: "0.2rem 0.4rem", textAlign: "right" }}
-                >
-                  {p.track_count}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <h3 style={{ marginTop: "1rem" }}>Save Playlist (Route 15)</h3>
-      <p style={{ fontSize: "0.85rem" }}>
-        Provide a playlist name and a comma-separated list of Spotify IDs
-        (you can copy IDs from the Mix or Track Search tabs).
-      </p>
-      <label>
-        Playlist name:{" "}
-        <input
-          value={saveName}
-          onChange={(e) => setSaveName(e.target.value)}
-        />
-      </label>
-      <br />
-      <textarea
-        rows={2}
-        style={{ width: "100%", marginTop: "0.25rem" }}
-        value={saveSpotifyIds}
-        onChange={(e) => setSaveSpotifyIds(e.target.value)}
-      />
-      <button onClick={savePlaylist} style={{ marginTop: "0.5rem" }}>
-        Save playlist for user {userId || "(set user id first)"}
-      </button>
-
-      <h3 style={{ marginTop: "1rem" }}>Delete Playlist (Route 17)</h3>
-      <label>
-        Playlist ID to delete:{" "}
-        <input
-          value={playlistToDelete}
-          onChange={(e) => setPlaylistToDelete(e.target.value)}
-          style={{ width: 100 }}
-        />
-      </label>{" "}
-      <button onClick={deletePlaylist}>Delete</button>
-
-      {message && (
-        <p style={{ marginTop: "0.5rem", color: "green" }}>{message}</p>
-      )}
     </section>
   );
 }
