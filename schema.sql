@@ -113,3 +113,8 @@ CREATE INDEX idx_audio_danceability ON audio_features(danceability);
 CREATE INDEX idx_billboard_date ON billboard_charts(chart_date);
 CREATE INDEX idx_billboard_rank ON billboard_charts(chart_rank);
 CREATE INDEX idx_song_join_spotify ON song_join(spotify_id);
+--
+CREATE INDEX idx_audio_energy ON audio_features(energy);
+CREATE INDEX idx_song_join_chart ON song_join(chart_id);
+CREATE INDEX idx_track_genres_spotify ON track_genres(spotify_id);
+CREATE INDEX idx_track_genres_genre ON track_genres(genre_id);
