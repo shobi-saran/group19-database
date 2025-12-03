@@ -50,7 +50,7 @@ function App() {
       }}
     >
       <header style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ margin: 0, fontSize: "1.8rem" }}>Music Discovery Dashboard</h1>
+        <h1 style={{ margin: 0, fontSize: "1.8rem" }}>SoundScape</h1>
         <p style={{ marginTop: "0.4rem", fontSize: "0.9rem", color: "#9ca3af" }}>
           Backend: <code>{BACKEND}/api/…</code>
         </p>
@@ -75,7 +75,6 @@ function App() {
           ["artist", "Artist-Based"],
           ["charts", "Chart Hits & Hidden Gems"],
           ["mood", "Workout / Happy / Throwback"],
-          ["mix", "Mix Playlist"],
           ["discover", "Search & Similar Artists"],
         ].map(([key, label]) => (
           <button
@@ -101,13 +100,12 @@ function App() {
       {activeTab === "artist" && <ArtistPanels />}
       {activeTab === "charts" && <ChartsPanels genres={genres} />}
       {activeTab === "mood" && <MoodPanels />}
-      {activeTab === "mix" && <MixPanel genres={genres} />}
       {activeTab === "discover" && <DiscoveryPanel />}
     </div>
   );
 }
 
-//helper
+// helper
 
 function PlaylistTable({ rows, extraCols = [] }) {
   if (!rows.length) return null;
@@ -278,7 +276,7 @@ function PlaylistTable({ rows, extraCols = [] }) {
   );
 }
 
-//Genre playlist (Route 2 + 11)
+// Genre playlist (Route 2 + 11)
 
 function GenrePlaylistPanel({ genres }) {
   const [selectedGenre, setSelectedGenre] = useState("");
@@ -428,7 +426,7 @@ function GenrePlaylistPanel({ genres }) {
   );
 }
 
-//Artist-based playlist (Route 1)
+// Artist-based playlist (Route 1)
 
 function ArtistPanels() {
   const [artistName, setArtistName] = useState("");
@@ -531,11 +529,11 @@ function ArtistPanels() {
   );
 }
 
-//Chart hits + hidden gems (Routes 3 & 4)
+// Chart hits + hidden gems (Routes 3 & 4)
 
 function ChartsPanels({ genres }) {
   const [genre, setGenre] = useState("");
-  const [maxRank, setMaxRank] = useState(50);
+  const maxRank = 1; // locked to #1
   const [chartHits, setChartHits] = useState([]);
   const [minPopularity, setMinPopularity] = useState(60);
   const [hiddenGems, setHiddenGems] = useState([]);
@@ -598,7 +596,7 @@ function ChartsPanels({ genres }) {
         Chart Hits & Hidden Gems
       </h2>
       <p style={{ marginTop: 0, marginBottom: "0.8rem", fontSize: "0.85rem", color: "#9ca3af" }}>
-        Compare well-known chart hits with highly popular tracks that never made the charts.
+        Compare #1 chart hits with highly popular tracks that never made the charts.
       </p>
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
         <select
@@ -625,7 +623,8 @@ function ChartsPanels({ genres }) {
           <input
             type="number"
             value={maxRank}
-            onChange={(e) => setMaxRank(Number(e.target.value))}
+            readOnly
+            disabled
             style={{
               width: 70,
               backgroundColor: "#020617",
@@ -633,6 +632,7 @@ function ChartsPanels({ genres }) {
               borderRadius: 8,
               padding: "0.2rem 0.4rem",
               border: "1px solid #1f2937",
+              cursor: "not-allowed",
             }}
           />
         </label>
@@ -714,7 +714,7 @@ function ChartsPanels({ genres }) {
   );
 }
 
-//Workout (Routes 5, 6, 7)
+// Workout (Routes 5, 6, 7)
 
 function MoodPanels() {
   const [workout, setWorkout] = useState([]);
@@ -928,192 +928,24 @@ function MoodPanels() {
   );
 }
 
-//Mix playlist (Route 8)
-
-function MixPanel({ genres }) {
-  const [genre, setGenre] = useState("");
-  const [maxChartRank, setMaxChartRank] = useState(30);
-  const [minPopularity, setMinPopularity] = useState(55);
-  const [hitsLimit, setHitsLimit] = useState(15);
-  const [gemsLimit, setGemsLimit] = useState(15);
-  const [mixRows, setMixRows] = useState([]);
-
-  const loadMix = async () => {
-    if (!genre) return;
-    const params = new URLSearchParams({
-      genre,
-      max_chart_rank: maxChartRank,
-      min_popularity: minPopularity,
-      hits_limit: hitsLimit,
-      gems_limit: gemsLimit,
-    });
-    const res = await fetch(`${BACKEND}/api/playlist/mix?${params}`);
-    const data = await res.json();
-    setMixRows(data);
-  };
-
-  return (
-    <section
-      style={{
-        backgroundColor: "#020617",
-        borderRadius: 16,
-        padding: "1.1rem 1.1rem 1.3rem",
-        border: "1px solid #111827",
-      }}
-    >
-      <h2 style={{ marginTop: 0, marginBottom: "0.4rem", fontSize: "1.2rem" }}>
-        Mix Playlist
-      </h2>
-      <p style={{ marginTop: 0, marginBottom: "0.8rem", fontSize: "0.85rem", color: "#9ca3af" }}>
-        Blend chart hits with hidden gems in a single playlist.
-      </p>
-
-      <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>
-        Chart Hits + Hidden Gems Mix
-      </h3>
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-        <select
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-          style={{
-            backgroundColor: "#020617",
-            color: "#e5e7eb",
-            borderRadius: 12,
-            padding: "0.45rem 0.9rem",
-            border: "1px solid #1f2937",
-            minWidth: 220,
-          }}
-        >
-          <option value="">Select genre</option>
-          {genres.map((g) => (
-            <option key={g.genre_id} value={g.genre_name}>
-              {g.genre_name}
-            </option>
-          ))}
-        </select>
-        <label style={{ fontSize: "0.9rem" }}>
-          Max chart rank:{" "}
-          <input
-            type="number"
-            value={maxChartRank}
-            onChange={(e) => setMaxChartRank(Number(e.target.value))}
-            style={{
-              width: 70,
-              backgroundColor: "#020617",
-              color: "#e5e7eb",
-              borderRadius: 8,
-              padding: "0.2rem 0.4rem",
-              border: "1px solid #1f2937",
-            }}
-          />
-        </label>
-        <label style={{ fontSize: "0.9rem" }}>
-          Min popularity:{" "}
-          <input
-            type="number"
-            value={minPopularity}
-            onChange={(e) => setMinPopularity(Number(e.target.value))}
-            style={{
-              width: 70,
-              backgroundColor: "#020617",
-              color: "#e5e7eb",
-              borderRadius: 8,
-              padding: "0.2rem 0.4rem",
-              border: "1px solid #1f2937",
-            }}
-          />
-        </label>
-        <label style={{ fontSize: "0.9rem" }}>
-          Hits:{" "}
-          <input
-            type="number"
-            value={hitsLimit}
-            onChange={(e) => setHitsLimit(Number(e.target.value))}
-            style={{
-              width: 60,
-              backgroundColor: "#020617",
-              color: "#e5e7eb",
-              borderRadius: 8,
-              padding: "0.2rem 0.4rem",
-              border: "1px solid #1f2937",
-            }}
-          />
-        </label>
-        <label style={{ fontSize: "0.9rem" }}>
-          Gems:{" "}
-          <input
-            type="number"
-            value={gemsLimit}
-            onChange={(e) => setGemsLimit(Number(e.target.value))}
-            style={{
-              width: 60,
-              backgroundColor: "#020617",
-              color: "#e5e7eb",
-              borderRadius: 8,
-              padding: "0.2rem 0.4rem",
-              border: "1px solid #1f2937",
-            }}
-          />
-        </label>
-        <button
-          onClick={loadMix}
-          style={{
-            padding: "0.45rem 0.9rem",
-            borderRadius: 10,
-            border: "1px solid #4f46e5",
-            backgroundColor: "#4f46e5",
-            color: "#f9fafb",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-          }}
-        >
-          Generate mix
-        </button>
-      </div>
-      <PlaylistTable
-        rows={mixRows}
-        extraCols={[
-          { key: "track_type", label: "Type" },
-          { key: "popularity", label: "Popularity", align: "right" },
-        ]}
-      />
-    </section>
-  );
-}
-
-//Discovery: artists, tracks, similar artists (Routes 9, 12, 18)
+// Discovery: artists & similar artists (Routes 9, 12)
 
 function DiscoveryPanel() {
   const [artistQuery, setArtistQuery] = useState("");
   const [artists, setArtists] = useState([]);
 
   const [similarBase, setSimilarBase] = useState("");
-  const [similarParams, setSimilarParams] = useState({
-    tempo_range: 25,
-    feature_range: 0.25,
+  const [similarParams] = useState({
     min_tracks: 5,
     limit: 10,
   });
   const [similarResults, setSimilarResults] = useState([]);
-
-  const [trackQuery, setTrackQuery] = useState("");
-  const [tracks, setTracks] = useState([]);
 
   const searchArtists = async () => {
     const params = new URLSearchParams({ search: artistQuery });
     const res = await fetch(`${BACKEND}/api/artists?${params}`);
     const data = await res.json();
     setArtists(data);
-  };
-
-  const searchTracks = async () => {
-    const params = new URLSearchParams({
-      query: trackQuery,
-      limit: 20,
-    });
-    const res = await fetch(`${BACKEND}/api/search/tracks?${params}`);
-    const data = await res.json();
-    setTracks(data);
   };
 
   const loadSimilar = async () => {
@@ -1191,7 +1023,7 @@ function DiscoveryPanel() {
         )}
       </div>
 
-      <div style={{ marginBottom: "1rem" }}>
+      <div>
         <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Similar Artists</h3>
         <input
           placeholder="Base artist (exact name)"
@@ -1206,49 +1038,6 @@ function DiscoveryPanel() {
             minWidth: 260,
           }}
         />{" "}
-        <label style={{ fontSize: "0.9rem" }}>
-          Tempo range:{" "}
-          <input
-            type="number"
-            value={similarParams.tempo_range}
-            onChange={(e) =>
-              setSimilarParams((p) => ({
-                ...p,
-                tempo_range: Number(e.target.value),
-              }))
-            }
-            style={{
-              width: 60,
-              backgroundColor: "#020617",
-              color: "#e5e7eb",
-              borderRadius: 8,
-              padding: "0.2rem 0.4rem",
-              border: "1px solid #1f2937",
-            }}
-          />
-        </label>{" "}
-        <label style={{ fontSize: "0.9rem" }}>
-          Feature range:{" "}
-          <input
-            type="number"
-            step="0.05"
-            value={similarParams.feature_range}
-            onChange={(e) =>
-              setSimilarParams((p) => ({
-                ...p,
-                feature_range: Number(e.target.value),
-              }))
-            }
-            style={{
-              width: 60,
-              backgroundColor: "#020617",
-              color: "#e5e7eb",
-              borderRadius: 8,
-              padding: "0.2rem 0.4rem",
-              border: "1px solid #1f2937",
-            }}
-          />
-        </label>{" "}
         <button
           onClick={loadSimilar}
           style={{
@@ -1363,124 +1152,6 @@ function DiscoveryPanel() {
                     }}
                   >
                     {Number(r.avg_energy).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div>
-        <h3 style={{ marginBottom: "0.3rem", fontSize: "1rem" }}>Search Tracks</h3>
-        <input
-          placeholder="Track name contains…"
-          value={trackQuery}
-          onChange={(e) => setTrackQuery(e.target.value)}
-          style={{
-            backgroundColor: "#020617",
-            color: "#e5e7eb",
-            borderRadius: 10,
-            padding: "0.45rem 0.7rem",
-            border: "1px solid #1f2937",
-            minWidth: 260,
-          }}
-        />{" "}
-        <button
-          onClick={searchTracks}
-          style={{
-            padding: "0.4rem 0.9rem",
-            borderRadius: 10,
-            border: "1px solid #4b5563",
-            backgroundColor: "#111827",
-            color: "#e5e7eb",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-          }}
-        >
-          Search tracks
-        </button>
-        {tracks.length > 0 && (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              marginTop: "0.5rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "0.3rem 0.4rem",
-                    borderBottom: "1px solid #1f2937",
-                  }}
-                >
-                  Track
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "0.3rem 0.4rem",
-                    borderBottom: "1px solid #1f2937",
-                  }}
-                >
-                  Artist
-                </th>
-                <th
-                  style={{
-                    textAlign: "right",
-                    padding: "0.3rem 0.4rem",
-                    borderBottom: "1px solid #1f2937",
-                  }}
-                >
-                  Popularity
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "0.3rem 0.4rem",
-                    borderBottom: "1px solid #1f2937",
-                  }}
-                >
-                  Album
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "0.3rem 0.4rem",
-                    borderBottom: "1px solid #1f2937",
-                  }}
-                >
-                  Spotify ID
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tracks.map((t, idx) => (
-                <tr key={idx}>
-                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
-                    {t.track_name}
-                  </td>
-                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
-                    {t.artist_name}
-                  </td>
-                  <td
-                    style={{
-                      padding: "0.25rem 0.4rem",
-                      textAlign: "right",
-                      borderBottom: "1px solid #0f172a",
-                    }}
-                  >
-                    {t.popularity}
-                  </td>
-                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
-                    {t.album_name}
-                  </td>
-                  <td style={{ padding: "0.25rem 0.4rem", borderBottom: "1px solid #0f172a" }}>
-                    {t.spotify_id}
                   </td>
                 </tr>
               ))}
